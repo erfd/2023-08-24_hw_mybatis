@@ -18,5 +18,5 @@ public interface RegionMapper {
 	int addRegion(Region region);
 
 	@Update("UPDATE regions SET name = #{name}, slug=#{slug} WHERE id = #{id}")
-	int updateRegion(@Param("id") Long id, @Param("name") String name, @Param("slug") String slug);
+	int updateRegion(Region region);
 }
