@@ -7,10 +7,7 @@ import org.fbnv.hwmybatis.mapper.RegionMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,10 +15,12 @@ import java.util.List;
 @RestController
 @RequestMapping("regions")
 public class RegionController {
+	public static final String SUCCESS = "success";
+	public static final String FAIL = "fail";
 	private final RegionMapper regionMapper;
 	private final ModelMapper modelMapper;
 
-	@GetMapping("/{id}")
+	@GetMapping("{id}")
 	public ResponseEntity<RegionDto> getRegion(@PathVariable("id") Long id) {
 		Region region = regionMapper.getRegion(id);
 		RegionDto regionDto = modelMapper.map(region, RegionDto.class);
@@ -30,10 +29,24 @@ public class RegionController {
 
 	@GetMapping
 	public ResponseEntity<List<RegionDto>> getAllRegions() {
-		List<Region> allRegions = regionMapper.getAllRegions();
-		List<RegionDto> regionDtos = allRegions.stream()
+		List<RegionDto> regionDtos = regionMapper.getAllRegions().stream()
 				.map(r -> modelMapper.map(r, RegionDto.class))
 				.toList();
 		return new ResponseEntity<>(regionDtos, HttpStatus.OK);
+	}
+
+	@PostMapping
+	public ResponseEntity<String> addRegion(@RequestBody RegionDto regionDto) {
+		Region region = modelMapper.map(regionDto, Region.class);
+		int updatedRows = regionMapper.addRegion(region);
+		String result = updatedRows > 0 ? SUCCESS : FAIL;
+		return new ResponseEntity<>(result, HttpStatus.OK);
+	}
+
+	@PutMapping("{id}")
+	public ResponseEntity<String> patchRegion(@PathVariable("id") Long id, @RequestBody RegionDto regionDto) {
+		int updatedRows = regionMapper.updateRegion(id, regionDto.getName(), regionDto.getSlug());
+		String result = updatedRows > 0 ? SUCCESS : FAIL;
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 }
